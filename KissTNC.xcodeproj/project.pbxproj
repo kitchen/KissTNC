@@ -8,8 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		7D5CCF762296FBE300BBED7D /* KissTNC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D5CCF6C2296FBE300BBED7D /* KissTNC.framework */; };
-		7D5CCF7B2296FBE300BBED7D /* KissTNCTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D5CCF7A2296FBE300BBED7D /* KissTNCTests.swift */; };
 		7D5CCF7D2296FBE300BBED7D /* KissTNC.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D5CCF6F2296FBE300BBED7D /* KissTNC.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		7D5CCF8C2296FD6300BBED7D /* KissFrameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D5CCF8B2296FD6300BBED7D /* KissFrameTests.swift */; };
+		7D5CCF942297007300BBED7D /* KissFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D5CCF932297007300BBED7D /* KissFrame.swift */; };
+		7D5CCF952297007300BBED7D /* KissFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D5CCF932297007300BBED7D /* KissFrame.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,8 +29,11 @@
 		7D5CCF6F2296FBE300BBED7D /* KissTNC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KissTNC.h; sourceTree = "<group>"; };
 		7D5CCF702296FBE300BBED7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7D5CCF752296FBE300BBED7D /* KissTNCTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KissTNCTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		7D5CCF7A2296FBE300BBED7D /* KissTNCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KissTNCTests.swift; sourceTree = "<group>"; };
 		7D5CCF7C2296FBE300BBED7D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7D5CCF8B2296FD6300BBED7D /* KissFrameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KissFrameTests.swift; sourceTree = "<group>"; };
+		7D5CCF912296FE9600BBED7D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		7D5CCF922297001F00BBED7D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		7D5CCF932297007300BBED7D /* KissFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KissFrame.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +58,8 @@
 		7D5CCF622296FBE300BBED7D = {
 			isa = PBXGroup;
 			children = (
+				7D5CCF922297001F00BBED7D /* LICENSE */,
+				7D5CCF912296FE9600BBED7D /* README.md */,
 				7D5CCF6E2296FBE300BBED7D /* KissTNC */,
 				7D5CCF792296FBE300BBED7D /* KissTNCTests */,
 				7D5CCF6D2296FBE300BBED7D /* Products */,
@@ -72,6 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				7D5CCF6F2296FBE300BBED7D /* KissTNC.h */,
+				7D5CCF932297007300BBED7D /* KissFrame.swift */,
 				7D5CCF702296FBE300BBED7D /* Info.plist */,
 			);
 			path = KissTNC;
@@ -80,7 +88,7 @@
 		7D5CCF792296FBE300BBED7D /* KissTNCTests */ = {
 			isa = PBXGroup;
 			children = (
-				7D5CCF7A2296FBE300BBED7D /* KissTNCTests.swift */,
+				7D5CCF8B2296FD6300BBED7D /* KissFrameTests.swift */,
 				7D5CCF7C2296FBE300BBED7D /* Info.plist */,
 			);
 			path = KissTNCTests;
@@ -148,6 +156,7 @@
 				TargetAttributes = {
 					7D5CCF6B2296FBE300BBED7D = {
 						CreatedOnToolsVersion = 10.2.1;
+						LastSwiftMigration = 1020;
 					};
 					7D5CCF742296FBE300BBED7D = {
 						CreatedOnToolsVersion = 10.2.1;
@@ -194,6 +203,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7D5CCF942297007300BBED7D /* KissFrame.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,7 +211,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7D5CCF7B2296FBE300BBED7D /* KissTNCTests.swift in Sources */,
+				7D5CCF952297007300BBED7D /* KissFrame.swift in Sources */,
+				7D5CCF8C2296FD6300BBED7D /* KissFrameTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,6 +351,7 @@
 		7D5CCF812296FBE300BBED7D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -359,6 +371,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.kitchen.KissTNC;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -366,6 +379,7 @@
 		7D5CCF822296FBE300BBED7D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -392,6 +406,7 @@
 		7D5CCF842296FBE300BBED7D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = CVF8U2WQ74;
@@ -410,6 +425,7 @@
 		7D5CCF852296FBE300BBED7D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = CVF8U2WQ74;
