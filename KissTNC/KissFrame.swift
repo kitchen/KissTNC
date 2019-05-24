@@ -32,7 +32,7 @@ public class KissFrame {
     // payload contains unescaped data
     var payload: Data!
     
-    init(_ data: Data) {
+    public init(_ data: Data) {
         if data[0] != KissFrame.FEND {
             // parse error
         }
@@ -43,7 +43,7 @@ public class KissFrame {
         payload = decode(data.suffix(from: 2).prefix(while: { $0 != KissFrame.FEND }))
     }
     
-    init(port inputPort: UInt8, command inputCommand: UInt8, payload inputPayload: Data) {
+    public init(port inputPort: UInt8, command inputCommand: UInt8, payload inputPayload: Data) {
         port = inputPort
         command = inputCommand
         payload = inputPayload
