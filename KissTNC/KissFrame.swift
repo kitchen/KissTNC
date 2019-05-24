@@ -30,7 +30,7 @@ public class KissFrame {
     var command: UInt8
     
     // payload contains unescaped data
-    var payload: Data
+    var payload: Data!
     
     init(_ data: Data) {
         if data[0] != KissFrame.FEND {
@@ -40,8 +40,7 @@ public class KissFrame {
         port = (data[1] & 0xf0) >> 4
         command = data[1] & 0x0f
         
-        payload = data.suffix(from: 2).prefix(while: { $0 != KissFrame.FEND })
-        // TODO: unescape FESC TFEND and FESC TFESC
+        payload = decode(data.suffix(from: 2).prefix(while: { $0 != KissFrame.FEND }))
     }
     
     init(port inputPort: UInt8, command inputCommand: UInt8, payload inputPayload: Data) {
@@ -53,8 +52,43 @@ public class KissFrame {
     func frame() -> Data {
         var outputFrame = Data([KissFrame.FEND])
         outputFrame.append(port << 4 | command)
-        outputFrame.append(payload) // TODO: escape FEND and FESC
+        outputFrame.append(encode(payload))
         outputFrame.append(KissFrame.FEND)
         return outputFrame
+    }
+    
+    private func decode(_ payload: Data) -> Data {
+        var newData = Data()
+        var iterator = payload.makeIterator()
+        while let byte = iterator.next() {
+            if byte == KissFrame.FESC {
+                let nextByte = iterator.next()
+                if nextByte == KissFrame.TFEND {
+                    newData.append(KissFrame.FEND)
+                } else if nextByte == KissFrame.TFESC {
+                    newData.append(KissFrame.FESC)
+                } else {
+                    // decoding error
+                }
+            } else {
+                newData.append(byte)
+            }
+        }
+        return newData
+    }
+    
+    private func encode(_ payload: Data) -> Data {
+        var newData = Data()
+        var iterator = payload.makeIterator()
+        while let byte = iterator.next() {
+            if byte == KissFrame.FEND {
+                newData.append(contentsOf: [KissFrame.FESC, KissFrame.TFEND])
+            } else if byte == KissFrame.FESC {
+                newData.append(contentsOf: [KissFrame.FESC, KissFrame.TFESC])
+            } else {
+                newData.append(byte)
+            }
+        }
+        return newData
     }
 }

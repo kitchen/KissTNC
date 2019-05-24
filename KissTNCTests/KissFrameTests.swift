@@ -23,6 +23,9 @@ class KissFrameTests: XCTestCase {
         
         frame = KissFrame(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FESC, KissFrame.TFESC, KissFrame.FEND]))
         XCTAssertEqual(frame.payload, Data([KissFrame.FEND, KissFrame.FESC]), "ensure we are properly unescaping")
+        
+        frame = KissFrame(Data([KissFrame.FEND, 0x00, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFEND, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFESC, 0x01, 0x01, 0x01, 0x01, KissFrame.FEND]))
+        XCTAssertEqual(frame.payload, Data([0x01, 0x01, 0x01, KissFrame.FEND, 0x01, 0x01, 0x01, KissFrame.FESC, 0x01, 0x01, 0x01, 0x01]))
     }
     
     func testGenerateFrames() {
@@ -36,6 +39,8 @@ class KissFrameTests: XCTestCase {
     func testRoundTrips() {
         let framesToRoundTrip = [
             KissFrame(Data([KissFrame.FEND, 0x00, 0x00, 0x01, 0x02, 0x03, KissFrame.FEND])),
+            KissFrame(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FEND])),
+            KissFrame(port: 0, command: 0, payload: Data([KissFrame.FEND, KissFrame.FESC])),
         ]
         for frame in framesToRoundTrip {
             let frame2 = KissFrame(port: frame.port, command: frame.command, payload: frame.payload)
@@ -43,9 +48,6 @@ class KissFrameTests: XCTestCase {
             
             XCTAssertEqual(frame.frame(), frame2.frame(), "they're all the same")
             XCTAssertEqual(frame.frame(), frame3.frame(), "they're all the same")
-            // XCTAssertEqual(frame1, frame2, "the frames are identical") // TODO: need to implement Equatable for this
-            // XCTAssertEqual(frame1, frame3, "the frames are identical") // TODO: need to implement Equatable for this
-            
         }
         
         
