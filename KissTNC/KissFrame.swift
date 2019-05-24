@@ -49,7 +49,7 @@ public class KissFrame {
         payload = inputPayload
     }
     
-    func frame() -> Data {
+    public func frame() -> Data {
         var outputFrame = Data([KissFrame.FEND])
         outputFrame.append(port << 4 | command)
         outputFrame.append(encode(payload))
