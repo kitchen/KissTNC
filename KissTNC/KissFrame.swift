@@ -26,11 +26,11 @@ public class KissFrame {
     static let SetHardware: UInt8 = 0x06
     static let Return: UInt8 = 0x0F
     
-    var port: UInt8
-    var command: UInt8
+    public var port: UInt8
+    public var command: UInt8
     
     // payload contains unescaped data
-    var payload: Data!
+    public var payload: Data!
     
     public init(_ data: Data) {
         if data[0] != KissFrame.FEND {
