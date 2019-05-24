@@ -34,6 +34,7 @@
 		7D5CCF912296FE9600BBED7D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7D5CCF922297001F00BBED7D /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		7D5CCF932297007300BBED7D /* KissFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KissFrame.swift; sourceTree = "<group>"; };
+		7D5CCF96229702EA00BBED7D /* KissTNC.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; indentWidth = 2; path = KissTNC.podspec; sourceTree = "<group>"; tabWidth = 2; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +61,7 @@
 			children = (
 				7D5CCF922297001F00BBED7D /* LICENSE */,
 				7D5CCF912296FE9600BBED7D /* README.md */,
+				7D5CCF96229702EA00BBED7D /* KissTNC.podspec */,
 				7D5CCF6E2296FBE300BBED7D /* KissTNC */,
 				7D5CCF792296FBE300BBED7D /* KissTNCTests */,
 				7D5CCF6D2296FBE300BBED7D /* Products */,
@@ -352,7 +354,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -368,8 +370,10 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = io.kitchen.KissTNC;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -380,7 +384,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -396,8 +400,10 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				PRODUCT_BUNDLE_IDENTIFIER = io.kitchen.KissTNC;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 			};
