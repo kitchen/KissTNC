@@ -33,14 +33,15 @@ public class KissFrame {
     public var payload: Data!
     
     public init(_ data: Data) {
+        var offset = 0
         if data[0] != KissFrame.FEND {
-            // parse error
+            offset = 1
         }
         
-        port = (data[1] & 0xf0) >> 4
-        command = data[1] & 0x0f
+        port = (data[1 - offset] & 0xf0) >> 4
+        command = data[1 - offset] & 0x0f
         
-        payload = decode(data.suffix(from: 2).prefix(while: { $0 != KissFrame.FEND }))
+        payload = decode(data.suffix(from: 2 - offset).prefix(while: { $0 != KissFrame.FEND }))
     }
     
     public init(port inputPort: UInt8, command inputCommand: UInt8, payload inputPayload: Data) {

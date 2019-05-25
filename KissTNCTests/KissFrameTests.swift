@@ -23,9 +23,14 @@ class KissFrameTests: XCTestCase {
         
         frame = KissFrame(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FESC, KissFrame.TFESC, KissFrame.FEND]))
         XCTAssertEqual(frame.payload, Data([KissFrame.FEND, KissFrame.FESC]), "ensure we are properly unescaping")
-        
+
         frame = KissFrame(Data([KissFrame.FEND, 0x00, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFEND, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFESC, 0x01, 0x01, 0x01, 0x01, KissFrame.FEND]))
         XCTAssertEqual(frame.payload, Data([0x01, 0x01, 0x01, KissFrame.FEND, 0x01, 0x01, 0x01, KissFrame.FESC, 0x01, 0x01, 0x01, 0x01]))
+
+        // assume something already cut off the FENDs
+        frame = KissFrame(Data([0x00, 0x01, 0x02, 0x03]))
+        XCTAssertEqual(0x00, frame.command)
+        XCTAssertEqual(Data([0x01, 0x02, 0x03]), frame.payload)
     }
     
     func testGenerateFrames() {
