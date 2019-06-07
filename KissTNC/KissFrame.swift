@@ -14,17 +14,19 @@ public class KissFrame {
     static let TFEND: UInt8 = 0xDC
     static let TFESC: UInt8 = 0xDD
     
-    static let DataFrame: UInt8 = 0x00
-    static let TXDelay: UInt8 = 0x01
-    static let P: UInt8 = 0x02
-    static let SlotTime: UInt8 = 0x03
-    static let TXTail: UInt8 = 0x04
-    static let FullDuplex: UInt8 = 0x05
-    static let SetHardware: UInt8 = 0x06
-    static let Return: UInt8 = 0x0F
+    public enum FrameType: UInt8 {
+        case DataFrame = 0x00
+        case TXDelay = 0x01
+        case P = 0x02
+        case SlotTime = 0x03
+        case TXTail = 0x04
+        case FullDuplex = 0x05
+        case SetHardware = 0x06
+        case Return = 0x0F
+    }
     
     public let port: UInt8
-    public let command: UInt8
+    public let command: FrameType
     
     // payload contains unescaped data
     public let payload: Data
@@ -45,13 +47,15 @@ public class KissFrame {
         }
 
         let port = (portCommandField & 0xf0) >> 4
-        let command = portCommandField & 0x0f
+        guard let command = FrameType(rawValue: portCommandField & 0x0f) else {
+            return nil
+        }
         
         let payload = decodedFrameData.suffix(from: decodedFrameData.startIndex + 1)
         self.init(port: port, command: command, payload: payload)
     }
     
-    public init(port: UInt8, command: UInt8, payload: Data) {
+    public init(port: UInt8, command: FrameType, payload: Data) {
         self.port = port
         self.command = command
         self.payload = payload
@@ -59,7 +63,7 @@ public class KissFrame {
     
     public func frame() -> Data {
         var outputFrame = Data([KissFrame.FEND])
-        outputFrame.append(KissFrame.encode(Data([port << 4 | command])))
+        outputFrame.append(KissFrame.encode(Data([port << 4 | command.rawValue])))
         outputFrame.append(KissFrame.encode(payload))
         outputFrame.append(KissFrame.FEND)
         return outputFrame

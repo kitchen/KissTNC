@@ -13,7 +13,7 @@ class KissFrameTests: XCTestCase {
         var frame = KissFrame(Data(base64Encoded: "wACEioKGnpxgrm6YqEBAdQPwUEFSQyBXSU5MSU5LIEdBVEVXQVkgT04gTVQgU0NPVFQsIENOODVSSywgUkVQRUFURVIgT04gMTQ2Ljg0IC02MDAsIElORk9AVzdMVC5PUkcNwA==")!)
         XCTAssertNotNil(frame)
         if let frame = frame {
-            XCTAssertEqual(0x00, frame.command, "the command is a data packet")
+            XCTAssertEqual(.DataFrame, frame.command, "the command is a data packet")
             XCTAssertEqual(0, frame.port, "the port is 0")
             XCTAssertEqual(97, frame.payload.count, "the length of the payload is 97")
             XCTAssertNotEqual(KissFrame.FEND, frame.payload.last, "we strip off the trailing FEND")
@@ -22,7 +22,7 @@ class KissFrameTests: XCTestCase {
         frame = KissFrame(Data([KissFrame.FEND, 0xff, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
-            XCTAssertEqual(KissFrame.Return, frame.command, "the command is end KISS")
+            XCTAssertEqual(KissFrame.FrameType.Return, frame.command, "the command is end KISS")
             XCTAssertEqual(0x0f, frame.port, "the port is F")
             XCTAssertEqual(0, frame.payload.count, "there is no payload")
         }
@@ -43,19 +43,19 @@ class KissFrameTests: XCTestCase {
         frame = KissFrame(Data([0x00, 0x01, 0x02, 0x03]))
         XCTAssertNotNil(frame)
         if let frame = frame {
-            XCTAssertEqual(0x00, frame.command)
+            XCTAssertEqual(.DataFrame, frame.command)
             XCTAssertEqual(Data([0x01, 0x02, 0x03]), frame.payload)
         }
     }
 
     func testGenerateFrames() {
-        var frame = KissFrame(port: 0x00, command: 0x00, payload: Data([0x00,0x01,0x02,0x03]))
+        var frame = KissFrame(port: 0x00, command: .DataFrame, payload: Data([0x00,0x01,0x02,0x03]))
         XCTAssertEqual(Data([KissFrame.FEND, 0x00, 0x00, 0x01, 0x02, 0x03, KissFrame.FEND]), frame.frame())
 
-        frame = KissFrame(port: 0x00, command: 0x00, payload: Data([KissFrame.FEND, KissFrame.FESC]))
+        frame = KissFrame(port: 0x00, command: .DataFrame, payload: Data([KissFrame.FEND, KissFrame.FESC]))
         XCTAssertEqual(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FESC, KissFrame.TFESC, KissFrame.FEND]), frame.frame(), "ensure we are properly escaping")
 
-        frame = KissFrame(port: 0x0C, command: 0x00, payload: Data([0x00, 0x00, 0x00]))
+        frame = KissFrame(port: 0x0C, command: .DataFrame, payload: Data([0x00, 0x00, 0x00]))
         XCTAssertEqual(Data([KissFrame.FEND, KissFrame.FESC, KissFrame.TFEND, 0x00, 0x00, 0x00, KissFrame.FEND]), frame.frame(), "port 12 command 0 is 0xC0 and needs encoding")
     }
 
@@ -64,7 +64,7 @@ class KissFrameTests: XCTestCase {
         let framesToRoundTrip = [
             KissFrame(Data([KissFrame.FEND, 0x00, 0x00, 0x01, 0x02, 0x03, KissFrame.FEND])),
             KissFrame(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FEND])),
-            KissFrame(port: 0, command: 0, payload: Data([KissFrame.FEND, KissFrame.FESC])),
+            KissFrame(port: 0, command: .DataFrame, payload: Data([KissFrame.FEND, KissFrame.FESC])),
         ]
         for frame in framesToRoundTrip {
             XCTAssertNotNil(frame)
