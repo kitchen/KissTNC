@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "KissTNC/KissFrame.swift"
+            timestampString = "581579423.431785"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "50"
+            endingLineNumber = "50"
+            landmarkName = "init(_:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "KissTNCTests.KissFrame.__allocating_init(Foundation.Data) -&gt; Swift.Optional&lt;KissTNCTests.KissFrame&gt;"
+                  moduleName = "KissTNCTests"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/kitchen/Documents/Development/KissTNC/KissTNC/KissFrame.swift"
+                  timestampString = "581579362.221645"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "51"
+                  endingLineNumber = "51"
+                  offsetFromSymbolStart = "308">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.UInt8) -&gt; Swift.Bool in KissTNCTests.KissFrame.init(Foundation.Data) -&gt; Swift.Optional&lt;KissTNCTests.KissFrame&gt;"
+                  moduleName = "KissTNCTests"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/kitchen/Documents/Development/KissTNC/KissTNC/KissFrame.swift"
+                  timestampString = "581579362.224409"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "51"
+                  endingLineNumber = "51"
+                  offsetFromSymbolStart = "20">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "KissTNC.KissFrame.__allocating_init(Foundation.Data) -&gt; Swift.Optional&lt;KissTNC.KissFrame&gt;"
+                  moduleName = "KissTNC"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/kitchen/Documents/Development/KissTNC/KissTNC/KissFrame.swift"
+                  timestampString = "581579362.2423919"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "51"
+                  endingLineNumber = "51"
+                  offsetFromSymbolStart = "308">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.UInt8) -&gt; Swift.Bool in KissTNC.KissFrame.init(Foundation.Data) -&gt; Swift.Optional&lt;KissTNC.KissFrame&gt;"
+                  moduleName = "KissTNC"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/kitchen/Documents/Development/KissTNC/KissTNC/KissFrame.swift"
+                  timestampString = "581579362.248628"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "51"
+                  endingLineNumber = "51"
+                  offsetFromSymbolStart = "20">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "KissTNCTests/KissFrameTests.swift"
+            timestampString = "581579423.431864"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "32"
+            endingLineNumber = "32"
+            landmarkName = "testParseFrames()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

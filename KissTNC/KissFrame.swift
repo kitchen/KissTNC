@@ -17,48 +17,58 @@ public class KissFrame {
     // If the FEND or FESC codes appear in the data to be transferred, they need to be escaped. The FEND code is then sent as FESC, TFEND and the FESC is then sent as FESC, TFESC.
     // I think this means after I pull the FENDs out I need to s/FESCTFEND/FEND/ and s/FESCTFESC/FESC/
     
-    static let DataFrame: UInt8 = 0x00
-    static let TXDelay: UInt8 = 0x01
-    static let P: UInt8 = 0x02
-    static let SlotTime: UInt8 = 0x03
-    static let TXTail: UInt8 = 0x04
-    static let FullDuplex: UInt8 = 0x05
-    static let SetHardware: UInt8 = 0x06
-    static let Return: UInt8 = 0x0F
+    // convert to enum of frame types?
+    public enum FrameType: UInt8 {
+        case DataFrame = 0x00
+        case TXDelay = 0x01
+        case P = 0x02
+        case SlotTime = 0x03
+        case TXTail = 0x04
+        case FullDuplex = 0x05
+        case SetHardware = 0x06
+        case Return = 0x0F
+
+    }
     
     public var port: UInt8
-    public var command: UInt8
+    public var frameType: FrameType
     
     // payload contains unescaped data
     public var payload: Data!
     
-    public init(_ data: Data) {
-        var offset = 0
-        if data[0] != KissFrame.FEND {
-            offset = 1
-        }
-        
-        port = (data[1 - offset] & 0xf0) >> 4
-        command = data[1 - offset] & 0x0f
-        
-        payload = decode(data.suffix(from: 2 - offset).prefix(while: { $0 != KissFrame.FEND }))
-    }
-    
-    public init(port inputPort: UInt8, command inputCommand: UInt8, payload inputPayload: Data) {
+    public init(ofType type: FrameType, port inputPort: UInt8, payload inputPayload: Data) {
         port = inputPort
-        command = inputCommand
+        frameType = type
         payload = inputPayload
     }
     
+    public convenience init?(_ data: Data) {
+        var offset = 0
+        if data[0] == KissFrame.FEND {
+            offset = 1
+        }
+        
+        let frameData = KissFrame.decode(data.suffix(from: offset).prefix(while: { $0 != KissFrame.FEND }))
+        
+        let port = (frameData[0] & 0xf0) >> 4
+        guard let frameType = FrameType(rawValue: frameData[0] & 0x0f) else {
+            return nil
+        }
+        
+        let payload = KissFrame.decode(frameData.suffix(from: 1))
+        self.init(ofType: frameType, port: port, payload: payload)
+    }
+
+    
     public func frame() -> Data {
         var outputFrame = Data([KissFrame.FEND])
-        outputFrame.append(encode(Data([port << 4 | command])))
-        outputFrame.append(encode(payload))
+        outputFrame.append(KissFrame.encode(Data([port << 4 | frameType.rawValue])))
+        outputFrame.append(KissFrame.encode(payload))
         outputFrame.append(KissFrame.FEND)
         return outputFrame
     }
 
-    private func decode(_ payload: Data) -> Data {
+    private static func decode(_ payload: Data) -> Data {
         var newData = Data()
         var iterator = payload.makeIterator()
         while let byte = iterator.next() {
@@ -78,7 +88,7 @@ public class KissFrame {
         return newData
     }
     
-    private func encode(_ payload: Data) -> Data {
+    private static func encode(_ payload: Data) -> Data {
         var newData = Data()
         var iterator = payload.makeIterator()
         while let byte = iterator.next() {
