@@ -23,11 +23,11 @@ public class KissFrame {
     static let SetHardware: UInt8 = 0x06
     static let Return: UInt8 = 0x0F
     
-    public var port: UInt8
-    public var command: UInt8
+    public let port: UInt8
+    public let command: UInt8
     
     // payload contains unescaped data
-    public var payload: Data!
+    public let payload: Data
     
     public convenience init?(_ data: Data) {
         var frameData = data
