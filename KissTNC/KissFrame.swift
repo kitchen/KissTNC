@@ -26,7 +26,7 @@ public class KissFrame {
     }
     
     public let port: UInt8
-    public let command: FrameType
+    public let frameType: FrameType
     
     // payload contains unescaped data
     public let payload: Data
@@ -42,28 +42,32 @@ public class KissFrame {
             return nil
         }
         
-        guard let portCommandField = decodedFrameData.first else {
+        guard let portFrameTypeField = decodedFrameData.first else {
             return nil
         }
 
-        let port = (portCommandField & 0xf0) >> 4
-        guard let command = FrameType(rawValue: portCommandField & 0x0f) else {
+        let port = (portFrameTypeField & 0xf0) >> 4
+        guard let frameType = FrameType(rawValue: portFrameTypeField & 0x0f) else {
             return nil
         }
         
         let payload = decodedFrameData.suffix(from: decodedFrameData.startIndex + 1)
-        self.init(port: port, command: command, payload: payload)
+        self.init(port: port, frameType: frameType, payload: payload)
     }
     
-    public init(port: UInt8, command: FrameType, payload: Data) {
+    public convenience init(ofType frameType: FrameType, port: UInt8, payload: Data) {
+        self.init(port: port, frameType: frameType, payload: payload)
+    }
+    
+    public init(port: UInt8, frameType: FrameType, payload: Data) {
         self.port = port
-        self.command = command
+        self.frameType = frameType
         self.payload = payload
     }
     
     public func frame() -> Data {
         var outputFrame = Data([KissFrame.FEND])
-        outputFrame.append(KissFrame.encode(Data([port << 4 | command.rawValue])))
+        outputFrame.append(KissFrame.encode(Data([port << 4 | frameType.rawValue])))
         outputFrame.append(KissFrame.encode(payload))
         outputFrame.append(KissFrame.FEND)
         return outputFrame
