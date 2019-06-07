@@ -31,8 +31,8 @@ public class KissFrame {
     
     public convenience init?(_ data: Data) {
         var frameData = data
-        if frameData[0] == KissFrame.FEND {
-            frameData = frameData[1...]
+        if frameData.first == KissFrame.FEND {
+            frameData = frameData.suffix(from: frameData.startIndex + 1)
         }
         frameData = frameData.prefix(while: { $0 != KissFrame.FEND })
         
@@ -40,10 +40,14 @@ public class KissFrame {
             return nil
         }
         
-        let port = (decodedFrameData[decodedFrameData.startIndex] & 0xf0) >> 4
-        let command = decodedFrameData[decodedFrameData.startIndex] & 0x0f
+        guard let portCommandField = decodedFrameData.first else {
+            return nil
+        }
+
+        let port = (portCommandField & 0xf0) >> 4
+        let command = portCommandField & 0x0f
         
-        let payload = decodedFrameData[(decodedFrameData.startIndex + 1)...]
+        let payload = decodedFrameData.suffix(from: decodedFrameData.startIndex + 1)
         self.init(port: port, command: command, payload: payload)
     }
     

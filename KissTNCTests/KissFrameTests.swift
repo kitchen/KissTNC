@@ -83,4 +83,18 @@ class KissFrameTests: XCTestCase {
             XCTAssertEqual(realFrame3.frame(), frame.frame(), "they're all the same")
         }
     }
+    
+    func testInvalidFrames() {
+        // FESC followed by the end of the frame. This should weed out errors with `iterator.next()` ... like the one this just triggered :)
+        var frame = KissFrame(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.FEND]))
+        XCTAssertNil(frame)
+        
+        // empty frame
+        frame = KissFrame(Data([KissFrame.FEND, KissFrame.FEND]))
+        XCTAssertNil(frame)
+        
+        // emptier frame
+        frame = KissFrame(Data([]))
+        XCTAssertNil(frame)
+    }
 }
