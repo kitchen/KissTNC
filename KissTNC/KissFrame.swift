@@ -9,13 +9,10 @@ import Foundation
 
 public class KissFrame {
     // TODO: Equatable protocol
-    // UInt8 is effectively a byte, and when you Data(...)![0] it returns a UInt8
     static let FEND: UInt8 = 0xC0
     static let FESC: UInt8 = 0xDB
     static let TFEND: UInt8 = 0xDC
     static let TFESC: UInt8 = 0xDD
-    // If the FEND or FESC codes appear in the data to be transferred, they need to be escaped. The FEND code is then sent as FESC, TFEND and the FESC is then sent as FESC, TFESC.
-    // I think this means after I pull the FENDs out I need to s/FESCTFEND/FEND/ and s/FESCTFESC/FESC/
     
     static let DataFrame: UInt8 = 0x00
     static let TXDelay: UInt8 = 0x01
@@ -32,64 +29,78 @@ public class KissFrame {
     // payload contains unescaped data
     public var payload: Data!
     
-    public init(_ data: Data) {
-        var offset = 0
-        if data[0] != KissFrame.FEND {
-            offset = 1
+    public convenience init?(_ data: Data) {
+        var frameData = data
+        if frameData[0] == KissFrame.FEND {
+            frameData = frameData[1...]
+        }
+        frameData = frameData.prefix(while: { $0 != KissFrame.FEND })
+        
+        guard let decodedFrameData = KissFrame.decode(frameData) else {
+            return nil
         }
         
-        port = (data[1 - offset] & 0xf0) >> 4
-        command = data[1 - offset] & 0x0f
+        let port = (decodedFrameData[decodedFrameData.startIndex] & 0xf0) >> 4
+        let command = decodedFrameData[decodedFrameData.startIndex] & 0x0f
         
-        payload = decode(data.suffix(from: 2 - offset).prefix(while: { $0 != KissFrame.FEND }))
+        let payload = decodedFrameData[(decodedFrameData.startIndex + 1)...]
+        self.init(port: port, command: command, payload: payload)
     }
     
-    public init(port inputPort: UInt8, command inputCommand: UInt8, payload inputPayload: Data) {
-        port = inputPort
-        command = inputCommand
-        payload = inputPayload
+    public init(port: UInt8, command: UInt8, payload: Data) {
+        self.port = port
+        self.command = command
+        self.payload = payload
     }
     
     public func frame() -> Data {
         var outputFrame = Data([KissFrame.FEND])
-        outputFrame.append(encode(Data([port << 4 | command])))
-        outputFrame.append(encode(payload))
+        outputFrame.append(KissFrame.encode(Data([port << 4 | command])))
+        outputFrame.append(KissFrame.encode(payload))
         outputFrame.append(KissFrame.FEND)
         return outputFrame
     }
 
-    private func decode(_ payload: Data) -> Data {
-        var newData = Data()
-        var iterator = payload.makeIterator()
-        while let byte = iterator.next() {
-            if byte == KissFrame.FESC {
-                let nextByte = iterator.next()
-                if nextByte == KissFrame.TFEND {
-                    newData.append(KissFrame.FEND)
-                } else if nextByte == KissFrame.TFESC {
-                    newData.append(KissFrame.FESC)
+    private static func decode(_ payload: Data) -> Data? {
+        if payload.firstIndex(of: KissFrame.FESC) != nil { // short circuit if there's nothing to decode
+            var newData = Data()
+            var iterator = payload.makeIterator()
+            while let byte = iterator.next() {
+                if byte == KissFrame.FESC {
+                    let nextByte = iterator.next()
+                    if nextByte == KissFrame.TFEND {
+                        newData.append(KissFrame.FEND)
+                    } else if nextByte == KissFrame.TFESC {
+                        newData.append(KissFrame.FESC)
+                    } else {
+                        return nil
+                    }
                 } else {
-                    // decoding error
+                    newData.append(byte)
                 }
-            } else {
-                newData.append(byte)
             }
+            return newData
+        } else {
+            return payload
         }
-        return newData
     }
     
-    private func encode(_ payload: Data) -> Data {
-        var newData = Data()
-        var iterator = payload.makeIterator()
-        while let byte = iterator.next() {
-            if byte == KissFrame.FEND {
-                newData.append(contentsOf: [KissFrame.FESC, KissFrame.TFEND])
-            } else if byte == KissFrame.FESC {
-                newData.append(contentsOf: [KissFrame.FESC, KissFrame.TFESC])
-            } else {
-                newData.append(byte)
+    private static func encode(_ payload: Data) -> Data {
+        if payload.first(where: { $0 == KissFrame.FEND || $0 == KissFrame.FESC }) != nil { // short circuit if there's nothing to encode
+            var newData = Data()
+            var iterator = payload.makeIterator()
+            while let byte = iterator.next() {
+                if byte == KissFrame.FEND {
+                    newData.append(contentsOf: [KissFrame.FESC, KissFrame.TFEND])
+                } else if byte == KissFrame.FESC {
+                    newData.append(contentsOf: [KissFrame.FESC, KissFrame.TFESC])
+                } else {
+                    newData.append(byte)
+                }
             }
+            return newData
+        } else {
+            return payload
         }
-        return newData
     }
 }
