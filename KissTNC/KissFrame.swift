@@ -52,19 +52,18 @@ public class KissFrame {
         }
         
         let payload = decodedFrameData.suffix(from: decodedFrameData.startIndex + 1)
-        self.init(port: port, frameType: frameType, payload: payload)
+        self.init(ofType: frameType, port: port, payload: payload)
     }
-    
-    public convenience init(ofType frameType: FrameType, port: UInt8, payload: Data) {
-        self.init(port: port, frameType: frameType, payload: payload)
-    }
-    
-    public init(port: UInt8, frameType: FrameType, payload: Data) {
+
+    public init?(ofType frameType: FrameType = .DataFrame, port: UInt8 = 0, payload: Data = Data([])) {
+        guard port <= 15 else {
+            return nil
+        }
         self.port = port
         self.frameType = frameType
         self.payload = payload
     }
-    
+
     public func frame() -> Data {
         var outputFrame = Data([KissFrame.FEND])
         outputFrame.append(KissFrame.encode(Data([port << 4 | frameType.rawValue])))
