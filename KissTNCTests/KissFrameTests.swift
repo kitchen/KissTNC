@@ -39,6 +39,9 @@ class KissFrameTests: XCTestCase {
 
         frame = KissFrame(port: 0x00, command: 0x00, payload: Data([KissFrame.FEND, KissFrame.FESC]))
         XCTAssertEqual(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FESC, KissFrame.TFESC, KissFrame.FEND]), frame.frame(), "ensure we are properly escaping")
+
+        frame = KissFrame(port: 0x0C, command: 0x00, payload: Data([0x00, 0x00, 0x00]))
+        XCTAssertEqual(Data([KissFrame.FEND, KissFrame.FESC, KissFrame.TFEND, 0x00, 0x00, 0x00, KissFrame.FEND]), frame.frame(), "port 12 command 0 is 0xC0 and needs encoding")
     }
 
     func testRoundTrips() {

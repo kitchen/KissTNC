@@ -52,12 +52,12 @@ public class KissFrame {
     
     public func frame() -> Data {
         var outputFrame = Data([KissFrame.FEND])
-        outputFrame.append(port << 4 | command)
+        outputFrame.append(encode(Data([port << 4 | command])))
         outputFrame.append(encode(payload))
         outputFrame.append(KissFrame.FEND)
         return outputFrame
     }
-    
+
     private func decode(_ payload: Data) -> Data {
         var newData = Data()
         var iterator = payload.makeIterator()
