@@ -8,7 +8,6 @@
 import Foundation
 
 public class KissFrame {
-    // TODO: Equatable protocol
     static let FEND: UInt8 = 0xC0
     static let FESC: UInt8 = 0xDB
     static let TFEND: UInt8 = 0xDC
@@ -153,5 +152,14 @@ public class KissFrame {
             }
         }
         return newData
+    }
+}
+
+extension KissFrame: Equatable {
+    public static func == (lhs: KissFrame, rhs: KissFrame) -> Bool {
+        return
+            lhs.frameType == rhs.frameType &&
+            lhs.port == rhs.port &&
+            lhs.payload == rhs.payload
     }
 }

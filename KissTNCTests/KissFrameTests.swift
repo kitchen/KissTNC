@@ -130,8 +130,8 @@ class KissFrameTests: XCTestCase {
                 continue
             }
 
-            XCTAssertEqual(frame2.frame(), frame.frame(), "they're all the same")
-            XCTAssertEqual(frame3.frame(), frame.frame(), "they're all the same")
+            XCTAssertEqual(frame, frame2)
+            XCTAssertEqual(frame2, frame3)
         }
     }
     
