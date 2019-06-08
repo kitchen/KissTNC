@@ -10,7 +10,7 @@ import XCTest
 
 class KissFrameTests: XCTestCase {
     func testParseFrames() {
-        var frame = KissFrame(Data(base64Encoded: "wACEioKGnpxgrm6YqEBAdQPwUEFSQyBXSU5MSU5LIEdBVEVXQVkgT04gTVQgU0NPVFQsIENOODVSSywgUkVQRUFURVIgT04gMTQ2Ljg0IC02MDAsIElORk9AVzdMVC5PUkcNwA==")!)
+        var frame = KissFrame(fromData: Data(base64Encoded: "wACEioKGnpxgrm6YqEBAdQPwUEFSQyBXSU5MSU5LIEdBVEVXQVkgT04gTVQgU0NPVFQsIENOODVSSywgUkVQRUFURVIgT04gMTQ2Ljg0IC02MDAsIElORk9AVzdMVC5PUkcNwA==")!)
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(.DataFrame, frame.frameType, "the frameType is a data packet")
@@ -19,7 +19,7 @@ class KissFrameTests: XCTestCase {
             XCTAssertNotEqual(KissFrame.FEND, frame.payload.last, "we strip off the trailing FEND")
         }
 
-        frame = KissFrame(Data([KissFrame.FEND, 0xff, KissFrame.FEND]))
+        frame = KissFrame(fromData: Data([KissFrame.FEND, 0xff, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.Return, frame.frameType, "the frameType is end KISS")
@@ -28,27 +28,27 @@ class KissFrameTests: XCTestCase {
         }
 
 
-        frame = KissFrame(Data([KissFrame.FEND, 0x00, KissFrame.FEND]))
+        frame = KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.DataFrame, frame.frameType)
             XCTAssertEqual(0, frame.payload.count)
         }
 
-        frame = KissFrame(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FESC, KissFrame.TFESC, KissFrame.FEND]))
+        frame = KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FESC, KissFrame.TFESC, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(Data([KissFrame.FEND, KissFrame.FESC]), frame.payload, "ensure we are properly unescaping")
         }
 
-        frame = KissFrame(Data([KissFrame.FEND, 0x00, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFEND, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFESC, 0x01, 0x01, 0x01, 0x01, KissFrame.FEND]))
+        frame = KissFrame(fromData: Data([KissFrame.FEND, 0x00, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFEND, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFESC, 0x01, 0x01, 0x01, 0x01, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(Data([0x01, 0x01, 0x01, KissFrame.FEND, 0x01, 0x01, 0x01, KissFrame.FESC, 0x01, 0x01, 0x01, 0x01]), frame.payload)
         }
 
         // assume something already cut off the FENDs
-        frame = KissFrame(Data([0x00, 0x01, 0x02, 0x03]))
+        frame = KissFrame(fromData: Data([0x00, 0x01, 0x02, 0x03]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(.DataFrame, frame.frameType)
@@ -60,13 +60,13 @@ class KissFrameTests: XCTestCase {
         // I'm interpreting this as "ignore the FESC, keep the non-TFESC/TFEND, exit escape mode, and move on with life
         // it's entirely possible that I should stay in escape mode and wait until a TFESC or TFEND comes along, but given that it says this "is an error", and the
         // spec says that FESC -> FESC, TFESC, and FEND -> FESC, TFEND, I think there's room for a lot of interpretation here and ... yea. It's fine.
-        frame = KissFrame(Data([KissFrame.FEND, 0x00, 0x00, KissFrame.FESC, 0x00, 0x00, KissFrame.FEND]))
+        frame = KissFrame(fromData: Data([KissFrame.FEND, 0x00, 0x00, KissFrame.FESC, 0x00, 0x00, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(Data([0x00,0x00,0x00]), frame.payload)
         }
         
-        frame = KissFrame(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.FEND]))
+        frame = KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.FEND]))
         XCTAssertNotNil(frame)
     }
 
@@ -111,8 +111,8 @@ class KissFrameTests: XCTestCase {
     func testRoundTrips() {
         // TODO: figure out a better way to loop over cases like this?
         let framesToRoundTrip: [KissFrame?] = [
-            KissFrame(Data([KissFrame.FEND, 0x00, 0x00, 0x01, 0x02, 0x03, KissFrame.FEND])),
-            KissFrame(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FEND])),
+            KissFrame(fromData: Data([KissFrame.FEND, 0x00, 0x00, 0x01, 0x02, 0x03, KissFrame.FEND])),
+            KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FEND])),
             KissFrame(ofType: .DataFrame, port: 0, payload: Data([KissFrame.FEND, KissFrame.FESC])),
         ]
         for frame in framesToRoundTrip {
@@ -125,7 +125,7 @@ class KissFrameTests: XCTestCase {
                 continue
             }
             
-            guard let frame3 = KissFrame(frame2.frame()) else {
+            guard let frame3 = KissFrame(fromData: frame2.frame()) else {
                 XCTFail()
                 continue
             }
@@ -137,11 +137,11 @@ class KissFrameTests: XCTestCase {
     
     func testInvalidFrames() {
         // empty frame
-        var frame = KissFrame(Data([KissFrame.FEND, KissFrame.FEND]))
+        var frame = KissFrame(fromData: Data([KissFrame.FEND, KissFrame.FEND]))
         XCTAssertNil(frame)
         
         // emptier frame
-        frame = KissFrame(Data([]))
+        frame = KissFrame(fromData: Data([]))
         XCTAssertNil(frame)
         
         frame = KissFrame(ofType: .DataFrame, port: 122, payload: Data([]))

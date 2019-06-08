@@ -31,7 +31,7 @@ public class KissFrame {
     // payload contains unescaped data
     public let payload: Data
     
-    public convenience init?(_ data: Data) {
+    public convenience init?(fromData data: Data) {
         var frameData = data
         if frameData.first == KissFrame.FEND {
             frameData = frameData.suffix(from: frameData.startIndex + 1)
