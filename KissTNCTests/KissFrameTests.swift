@@ -222,6 +222,7 @@ class KissFrameTests: XCTestCase {
         XCTAssertNotEqual(0, firstFENDIndex, "make sure we are setting the scenario properly")
         let frameDataSlice = frameData.suffix(from: firstFENDIndex)
         let frame = KissFrame(fromData: frameDataSlice)
+        XCTAssertEqual(Data([KissFrame.FEND, 0x00, 0x00, 0x00, KissFrame.FEND]), frameDataSlice)
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.DataFrame, frame.frameType)
@@ -236,8 +237,10 @@ class KissFrameTests: XCTestCase {
             return
         }
         XCTAssertNotEqual(0, firstFENDIndex, "make sure we are setting the scenario properly")
-        let frameDataSlice = frameData.suffix(from: firstFENDIndex).prefix(while: { $0 != KissFrame.FEND })
+        let frameDataSlice = frameData.suffix(from: firstFENDIndex + 1).prefix(while: { $0 != KissFrame.FEND })
+        XCTAssertEqual(Data([0x00, 0x00, 0x00]), frameDataSlice)
         let frame = KissFrame(fromData: frameDataSlice)
+        XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.DataFrame, frame.frameType)
             XCTAssertEqual(Data([0x00, 0x00]), frame.payload)
