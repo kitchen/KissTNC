@@ -182,7 +182,7 @@ class KissFrameTests: XCTestCase {
     }
     
     func testPInitializers() {
-        let frame = KissFrame(p: 42)
+        let frame = KissFrame(P: 42)
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.P, frame.frameType)

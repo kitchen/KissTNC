@@ -61,8 +61,8 @@ public class KissFrame {
         self.init(ofType: .TXDelay, port: port, payload: Data([txDelay]))
     }
     
-    public convenience init?(p: UInt8, port: UInt8 = 0) {
-        self.init(ofType: .P, port: port, payload: Data([p]))
+    public convenience init?(P: UInt8, port: UInt8 = 0) {
+        self.init(ofType: .P, port: port, payload: Data([P]))
     }
     
     public convenience init?(slotTime: UInt8, port: UInt8 = 0) {
