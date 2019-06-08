@@ -212,4 +212,35 @@ class KissFrameTests: XCTestCase {
         let frame = KissFrame(return: 42)
         XCTAssertEqual(KissFrame.FrameType.Return, frame.frameType)
     }
+    
+    func testNonZeroStartIndex() {
+        let frameData = Data([0x00, 0x00, 0x00, KissFrame.FEND, 0x00, 0x00, 0x00, KissFrame.FEND])
+        guard let firstFENDIndex = frameData.firstIndex(of: KissFrame.FEND) else {
+            XCTFail()
+            return
+        }
+        XCTAssertNotEqual(0, firstFENDIndex, "make sure we are setting the scenario properly")
+        let frameDataSlice = frameData.suffix(from: firstFENDIndex)
+        let frame = KissFrame(fromData: frameDataSlice)
+        XCTAssertNotNil(frame)
+        if let frame = frame {
+            XCTAssertEqual(KissFrame.FrameType.DataFrame, frame.frameType)
+            XCTAssertEqual(Data([0x00, 0x00]), frame.payload)
+        }
+    }
+    
+    func testMiddleOfData() {
+        let frameData = Data([0x00, 0x00, 0x00, KissFrame.FEND, 0x00, 0x00, 0x00, KissFrame.FEND, 0x42, 0x42])
+        guard let firstFENDIndex = frameData.firstIndex(of: KissFrame.FEND) else {
+            XCTFail()
+            return
+        }
+        XCTAssertNotEqual(0, firstFENDIndex, "make sure we are setting the scenario properly")
+        let frameDataSlice = frameData.suffix(from: firstFENDIndex).prefix(while: { $0 != KissFrame.FEND })
+        let frame = KissFrame(fromData: frameDataSlice)
+        if let frame = frame {
+            XCTAssertEqual(KissFrame.FrameType.DataFrame, frame.frameType)
+            XCTAssertEqual(Data([0x00, 0x00]), frame.payload)
+        }
+    }
 }
