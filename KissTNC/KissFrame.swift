@@ -7,7 +7,7 @@
 //
 import Foundation
 
-public class KissFrame {
+public struct KissFrame {
     static let FEND: UInt8 = 0xC0
     static let FESC: UInt8 = 0xDB
     static let TFEND: UInt8 = 0xDC
@@ -30,7 +30,7 @@ public class KissFrame {
     // payload contains unescaped data
     public let payload: Data
     
-    public convenience init?(fromData data: Data) {
+    public init?(fromData data: Data) {
         var frameData = data
         if frameData.first == KissFrame.FEND {
             frameData = frameData.suffix(from: frameData.startIndex + 1)
@@ -52,40 +52,40 @@ public class KissFrame {
     }
     
     
-    public convenience init?(data: Data, port: UInt8 = 0) {
+    public init?(data: Data, port: UInt8 = 0) {
         self.init(ofType: .DataFrame, port: port, payload: data)
     }
     
-    public convenience init?(txDelay: UInt8, port: UInt8 = 0) {
+    public init?(txDelay: UInt8, port: UInt8 = 0) {
         self.init(ofType: .TXDelay, port: port, payload: Data([txDelay]))
     }
     
-    public convenience init?(P: UInt8, port: UInt8 = 0) {
+    public init?(P: UInt8, port: UInt8 = 0) {
         self.init(ofType: .P, port: port, payload: Data([P]))
     }
     
-    public convenience init?(slotTime: UInt8, port: UInt8 = 0) {
+    public init?(slotTime: UInt8, port: UInt8 = 0) {
         self.init(ofType: .SlotTime, port: port, payload: Data([slotTime]))
     }
     
     @available(*, deprecated, message: "obsolete according to spec, only here for compatibility")
-    public convenience init?(txTail: UInt8, port: UInt8 = 0) {
+    public init?(txTail: UInt8, port: UInt8 = 0) {
         self.init(ofType: .TXTail, port: port, payload: Data([txTail]))
     }
 
-    public convenience init?(fullDuplex: Bool, port: UInt8 = 0) {
+    public init?(fullDuplex: Bool, port: UInt8 = 0) {
         self.init(ofType: .FullDuplex, port: port, payload: Data([fullDuplex ? 1 : 0]))
     }
 
-    public convenience init?(setHardware: Data, port: UInt8 = 0) {
+    public init?(setHardware: Data, port: UInt8 = 0) {
         self.init(ofType: .SetHardware, port: port, payload: setHardware)
     }
     
-    public convenience init(return: Any) {
+    public init(return: Any) {
         self.init(type: .Return, port: 0xf)
     }
 
-    public convenience init?(ofType frameType: FrameType = .DataFrame, port: UInt8 = 0, payload: Data = Data([])) {
+    public init?(ofType frameType: FrameType = .DataFrame, port: UInt8 = 0, payload: Data = Data([])) {
         guard port <= 15 else {
             print("guard condition failed")
             return nil
