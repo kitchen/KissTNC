@@ -10,7 +10,8 @@ import XCTest
 
 class KissFrameTests: XCTestCase {
     func testParseFrames() {
-        var frame = KissFrame(fromData: Data(base64Encoded: "wACEioKGnpxgrm6YqEBAdQPwUEFSQyBXSU5MSU5LIEdBVEVXQVkgT04gTVQgU0NPVFQsIENOODVSSywgUkVQRUFURVIgT04gMTQ2Ljg0IC02MDAsIElORk9AVzdMVC5PUkcNwA==")!)
+        var frame: KissFrame?
+        frame = try? KissFrame(fromData: Data(base64Encoded: "wACEioKGnpxgrm6YqEBAdQPwUEFSQyBXSU5MSU5LIEdBVEVXQVkgT04gTVQgU0NPVFQsIENOODVSSywgUkVQRUFURVIgT04gMTQ2Ljg0IC02MDAsIElORk9AVzdMVC5PUkcNwA==")!)
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(.DataFrame, frame.frameType, "the frameType is a data packet")
@@ -19,7 +20,7 @@ class KissFrameTests: XCTestCase {
             XCTAssertNotEqual(KissFrame.FEND, frame.payload.last, "we strip off the trailing FEND")
         }
 
-        frame = KissFrame(fromData: Data([KissFrame.FEND, 0xff, KissFrame.FEND]))
+        frame = try? KissFrame(fromData: Data([KissFrame.FEND, 0xff, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.Return, frame.frameType, "the frameType is end KISS")
@@ -28,27 +29,27 @@ class KissFrameTests: XCTestCase {
         }
 
 
-        frame = KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FEND]))
+        frame = try? KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.DataFrame, frame.frameType)
             XCTAssertEqual(0, frame.payload.count)
         }
 
-        frame = KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FESC, KissFrame.TFESC, KissFrame.FEND]))
+        frame = try? KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FESC, KissFrame.TFESC, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(Data([KissFrame.FEND, KissFrame.FESC]), frame.payload, "ensure we are properly unescaping")
         }
 
-        frame = KissFrame(fromData: Data([KissFrame.FEND, 0x00, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFEND, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFESC, 0x01, 0x01, 0x01, 0x01, KissFrame.FEND]))
+        frame = try? KissFrame(fromData: Data([KissFrame.FEND, 0x00, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFEND, 0x01, 0x01, 0x01, KissFrame.FESC, KissFrame.TFESC, 0x01, 0x01, 0x01, 0x01, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(Data([0x01, 0x01, 0x01, KissFrame.FEND, 0x01, 0x01, 0x01, KissFrame.FESC, 0x01, 0x01, 0x01, 0x01]), frame.payload)
         }
 
         // assume something already cut off the FENDs
-        frame = KissFrame(fromData: Data([0x00, 0x01, 0x02, 0x03]))
+        frame = try? KissFrame(fromData: Data([0x00, 0x01, 0x02, 0x03]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(.DataFrame, frame.frameType)
@@ -60,43 +61,44 @@ class KissFrameTests: XCTestCase {
         // I'm interpreting this as "ignore the FESC, keep the non-TFESC/TFEND, exit escape mode, and move on with life
         // it's entirely possible that I should stay in escape mode and wait until a TFESC or TFEND comes along, but given that it says this "is an error", and the
         // spec says that FESC -> FESC, TFESC, and FEND -> FESC, TFEND, I think there's room for a lot of interpretation here and ... yea. It's fine.
-        frame = KissFrame(fromData: Data([KissFrame.FEND, 0x00, 0x00, KissFrame.FESC, 0x00, 0x00, KissFrame.FEND]))
+        frame = try? KissFrame(fromData: Data([KissFrame.FEND, 0x00, 0x00, KissFrame.FESC, 0x00, 0x00, KissFrame.FEND]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(Data([0x00,0x00,0x00]), frame.payload)
         }
         
-        frame = KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.FEND]))
+        frame = try? KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.FEND]))
         XCTAssertNotNil(frame)
     }
 
 
     func testGenerateFrames() {
-        var frame = KissFrame(ofType: .DataFrame, port: 0x00, payload: Data([0x00,0x01,0x02,0x03]))
+        var frame: KissFrame?
+        frame = try? KissFrame(ofType: .DataFrame, port: 0x00, payload: Data([0x00,0x01,0x02,0x03]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(Data([KissFrame.FEND, 0x00, 0x00, 0x01, 0x02, 0x03, KissFrame.FEND]), frame.frame())
         }
 
-        frame = KissFrame(ofType: .DataFrame, port: 0x00, payload: Data([KissFrame.FEND, KissFrame.FESC]))
+        frame = try? KissFrame(ofType: .DataFrame, port: 0x00, payload: Data([KissFrame.FEND, KissFrame.FESC]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FESC, KissFrame.TFESC, KissFrame.FEND]), frame.frame(), "ensure we are properly escaping")
         }
 
-        frame = KissFrame(ofType: .DataFrame, port: 0x0C, payload: Data([0x00, 0x00, 0x00]))
+        frame = try? KissFrame(ofType: .DataFrame, port: 0x0C, payload: Data([0x00, 0x00, 0x00]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(Data([KissFrame.FEND, KissFrame.FESC, KissFrame.TFEND, 0x00, 0x00, 0x00, KissFrame.FEND]), frame.frame(), "port 12 frameType 0 is 0xC0 and needs encoding")
         }
         
-        frame = KissFrame(ofType: .DataFrame, port: 4)
+        frame = try? KissFrame(ofType: .DataFrame, port: 4)
         XCTAssertNotNil(frame)
         
-        frame = KissFrame(payload: Data([]))
+        frame = try? KissFrame(payload: Data([]))
         XCTAssertNotNil(frame)
         
-        frame = KissFrame()
+        frame = try? KissFrame()
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(0, frame.port)
@@ -104,28 +106,28 @@ class KissFrameTests: XCTestCase {
             XCTAssertEqual(Data([]), frame.payload)
         }
         
-        frame = KissFrame(port: 2, payload: Data([]))
+        frame = try? KissFrame(port: 2, payload: Data([]))
         XCTAssertNotNil(frame)
     }
 
     func testRoundTrips() {
         // TODO: figure out a better way to loop over cases like this?
         let framesToRoundTrip: [KissFrame?] = [
-            KissFrame(fromData: Data([KissFrame.FEND, 0x00, 0x00, 0x01, 0x02, 0x03, KissFrame.FEND])),
-            KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FEND])),
-            KissFrame(ofType: .DataFrame, port: 0, payload: Data([KissFrame.FEND, KissFrame.FESC])),
+            try? KissFrame(fromData: Data([KissFrame.FEND, 0x00, 0x00, 0x01, 0x02, 0x03, KissFrame.FEND])),
+            try? KissFrame(fromData: Data([KissFrame.FEND, 0x00, KissFrame.FESC, KissFrame.TFEND, KissFrame.FEND])),
+            try? KissFrame(ofType: .DataFrame, port: 0, payload: Data([KissFrame.FEND, KissFrame.FESC])),
         ]
         for frame in framesToRoundTrip {
             XCTAssertNotNil(frame)
             guard let frame = frame else {
                 continue
             }
-            guard let frame2 = KissFrame(ofType: frame.frameType, port: frame.port, payload: frame.payload) else {
+            guard let frame2 = try? KissFrame(ofType: frame.frameType, port: frame.port, payload: frame.payload) else {
                 XCTFail()
                 continue
             }
             
-            guard let frame3 = KissFrame(fromData: frame2.frame()) else {
+            guard let frame3 = try? KissFrame(fromData: frame2.frame()) else {
                 XCTFail()
                 continue
             }
@@ -137,19 +139,24 @@ class KissFrameTests: XCTestCase {
     
     func testInvalidFrames() {
         // empty frame
-        var frame = KissFrame(fromData: Data([KissFrame.FEND, KissFrame.FEND]))
-        XCTAssertNil(frame)
-        
+        XCTAssertThrowsError(try KissFrame(fromData: Data([KissFrame.FEND, KissFrame.FEND]))) { error in
+            // FIXME: would like to figure out how to properly test that we're throwing the right error
+            // XCTAssertEqual(error, KissFrame.Errors.EmptyFrame)
+        }
+
         // emptier frame
-        frame = KissFrame(fromData: Data([]))
-        XCTAssertNil(frame)
+        XCTAssertThrowsError(try KissFrame(fromData: Data([]))) { error in
+            // XCTAssertEqual(KissFrame.Errors.EmptyFrame, error)
+        }
+
         
-        frame = KissFrame(ofType: .DataFrame, port: 122, payload: Data([]))
-        XCTAssertNil(frame)
+        XCTAssertThrowsError(try KissFrame(ofType: .DataFrame, port: 122, payload: Data([]))) { error in
+            // XCTAssertEqual(KissFrame.Errors.InvalidPortNumber(122), error)
+        }
     }
     
     func testDataFrameInitializers() {
-        let frame = KissFrame(data: Data([]))
+        let frame = try? KissFrame(data: Data([]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.DataFrame, frame.frameType)
@@ -157,14 +164,14 @@ class KissFrameTests: XCTestCase {
     }
     
     func testFullDuplexInitializers() {
-        var frame = KissFrame(fullDuplex: true)
+        var frame = try? KissFrame(fullDuplex: true)
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.FullDuplex, frame.frameType)
             XCTAssertEqual(Data([0x01]), frame.payload)
         }
         
-        frame = KissFrame(fullDuplex: false)
+        frame = try? KissFrame(fullDuplex: false)
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.FullDuplex, frame.frameType)
@@ -173,7 +180,7 @@ class KissFrameTests: XCTestCase {
     }
     
     func testTxDelayInitializers() {
-        let frame = KissFrame(txDelay: 42)
+        let frame = try? KissFrame(txDelay: 42)
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.TXDelay, frame.frameType)
@@ -182,7 +189,7 @@ class KissFrameTests: XCTestCase {
     }
     
     func testPInitializers() {
-        let frame = KissFrame(P: 42)
+        let frame = try? KissFrame(P: 42)
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.P, frame.frameType)
@@ -191,7 +198,7 @@ class KissFrameTests: XCTestCase {
     }
     
     func testSlotTimeInitializers() {
-        let frame = KissFrame(slotTime: 42)
+        let frame = try? KissFrame(slotTime: 42)
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.SlotTime, frame.frameType)
@@ -200,7 +207,7 @@ class KissFrameTests: XCTestCase {
     }
     
     func testSetHardwareInitializers() {
-        let frame = KissFrame(setHardware: Data([0x01, 0x02]))
+        let frame = try? KissFrame(setHardware: Data([0x01, 0x02]))
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.SetHardware, frame.frameType)
@@ -221,7 +228,7 @@ class KissFrameTests: XCTestCase {
         }
         XCTAssertNotEqual(0, firstFENDIndex, "make sure we are setting the scenario properly")
         let frameDataSlice = frameData.suffix(from: firstFENDIndex)
-        let frame = KissFrame(fromData: frameDataSlice)
+        let frame = try? KissFrame(fromData: frameDataSlice)
         XCTAssertEqual(Data([KissFrame.FEND, 0x00, 0x00, 0x00, KissFrame.FEND]), frameDataSlice)
         XCTAssertNotNil(frame)
         if let frame = frame {
@@ -239,7 +246,7 @@ class KissFrameTests: XCTestCase {
         XCTAssertNotEqual(0, firstFENDIndex, "make sure we are setting the scenario properly")
         let frameDataSlice = frameData.suffix(from: firstFENDIndex + 1).prefix(while: { $0 != KissFrame.FEND })
         XCTAssertEqual(Data([0x00, 0x00, 0x00]), frameDataSlice)
-        let frame = KissFrame(fromData: frameDataSlice)
+        let frame = try? KissFrame(fromData: frameDataSlice)
         XCTAssertNotNil(frame)
         if let frame = frame {
             XCTAssertEqual(KissFrame.FrameType.DataFrame, frame.frameType)

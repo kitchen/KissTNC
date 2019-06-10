@@ -7,7 +7,7 @@
 //
 import Foundation
 
-public struct KissFrame {
+public class KissFrame {
     static let FEND: UInt8 = 0xC0
     static let FESC: UInt8 = 0xDB
     static let TFEND: UInt8 = 0xDC
@@ -24,13 +24,19 @@ public struct KissFrame {
         case Return = 0x0F
     }
     
+    public enum Errors: Error, Equatable {
+        case EmptyFrame
+        case InvalidFrameType(_ frameType: UInt8)
+        case InvalidPortNumber(_ portNumber: UInt8)
+    }
+    
     public let port: UInt8
     public let frameType: FrameType
     
     // payload contains unescaped data
     public let payload: Data
     
-    public init?(fromData data: Data) {
+    public convenience init(fromData data: Data) throws {
         var frameData = data
         if frameData.first == KissFrame.FEND {
             frameData = frameData.suffix(from: frameData.startIndex + 1)
@@ -39,61 +45,58 @@ public struct KissFrame {
         
         let decodedFrameData = KissFrame.decode(frameData)
         guard let portFrameTypeField = decodedFrameData.first else {
-            return nil
+            throw Errors.EmptyFrame
         }
 
         let port = (portFrameTypeField & 0xf0) >> 4
-        guard let frameType = FrameType(rawValue: portFrameTypeField & 0x0f) else {
-            return nil
+        let frameTypeValue = portFrameTypeField & 0x0f
+
+        guard let frameType = FrameType(rawValue: frameTypeValue) else {
+            throw Errors.InvalidFrameType(frameTypeValue)
         }
         
         let payload = decodedFrameData.suffix(from: decodedFrameData.startIndex + 1)
-        self.init(ofType: frameType, port: port, payload: payload)
+        try self.init(ofType: frameType, port: port, payload: payload)
     }
     
     
-    public init?(data: Data, port: UInt8 = 0) {
-        self.init(ofType: .DataFrame, port: port, payload: data)
+    public convenience init(data: Data, port: UInt8 = 0) throws {
+        try self.init(ofType: .DataFrame, port: port, payload: data)
     }
     
-    public init?(txDelay: UInt8, port: UInt8 = 0) {
-        self.init(ofType: .TXDelay, port: port, payload: Data([txDelay]))
+    public convenience init(txDelay: UInt8, port: UInt8 = 0) throws {
+        try self.init(ofType: .TXDelay, port: port, payload: Data([txDelay]))
     }
     
-    public init?(P: UInt8, port: UInt8 = 0) {
-        self.init(ofType: .P, port: port, payload: Data([P]))
+    public convenience init(P: UInt8, port: UInt8 = 0) throws {
+        try self.init(ofType: .P, port: port, payload: Data([P]))
     }
     
-    public init?(slotTime: UInt8, port: UInt8 = 0) {
-        self.init(ofType: .SlotTime, port: port, payload: Data([slotTime]))
+    public convenience init(slotTime: UInt8, port: UInt8 = 0) throws {
+        try self.init(ofType: .SlotTime, port: port, payload: Data([slotTime]))
     }
     
     @available(*, deprecated, message: "obsolete according to spec, only here for compatibility")
-    public init?(txTail: UInt8, port: UInt8 = 0) {
-        self.init(ofType: .TXTail, port: port, payload: Data([txTail]))
+    public convenience init?(txTail: UInt8, port: UInt8 = 0) throws {
+        try self.init(ofType: .TXTail, port: port, payload: Data([txTail]))
     }
 
-    public init?(fullDuplex: Bool, port: UInt8 = 0) {
-        self.init(ofType: .FullDuplex, port: port, payload: Data([fullDuplex ? 1 : 0]))
+    public convenience init(fullDuplex: Bool, port: UInt8 = 0) throws {
+        try self.init(ofType: .FullDuplex, port: port, payload: Data([fullDuplex ? 1 : 0]))
     }
 
-    public init?(setHardware: Data, port: UInt8 = 0) {
-        self.init(ofType: .SetHardware, port: port, payload: setHardware)
+    public convenience init(setHardware: Data, port: UInt8 = 0) throws {
+        try self.init(ofType: .SetHardware, port: port, payload: setHardware)
     }
     
-    public init(return: Any) {
-        self.init(type: .Return, port: 0xf)
+    public convenience init(return: Any) {
+        try! self.init(ofType: .Return, port: 0xf) // try! is ok here because I
     }
 
-    public init?(ofType frameType: FrameType = .DataFrame, port: UInt8 = 0, payload: Data = Data([])) {
+    public init(ofType frameType: FrameType = .DataFrame, port: UInt8 = 0, payload: Data = Data([])) throws {
         guard port <= 15 else {
-            print("guard condition failed")
-            return nil
+            throw Errors.InvalidPortNumber(port)
         }
-        self.init(type: frameType, port: port, payload: payload)
-    }
-
-    private init(type frameType: FrameType, port: UInt8 = 0, payload: Data = Data([])) {
         self.frameType = frameType
         self.port = port
         self.payload = payload
