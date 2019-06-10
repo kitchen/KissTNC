@@ -24,7 +24,7 @@ public class KissFrame {
         case Return = 0x0F
     }
     
-    public enum Errors: Error, Equatable {
+    public enum Errors: Error {
         case EmptyFrame
         case InvalidFrameType(_ frameType: UInt8)
         case InvalidPortNumber(_ portNumber: UInt8)
