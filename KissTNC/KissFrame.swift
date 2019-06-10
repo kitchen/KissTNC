@@ -58,8 +58,7 @@ public class KissFrame {
         let payload = decodedFrameData.suffix(from: decodedFrameData.startIndex + 1)
         try self.init(ofType: frameType, port: port, payload: payload)
     }
-    
-    
+
     public convenience init(data: Data, port: UInt8 = 0) throws {
         try self.init(ofType: .DataFrame, port: port, payload: data)
     }
@@ -89,8 +88,10 @@ public class KissFrame {
         try self.init(ofType: .SetHardware, port: port, payload: setHardware)
     }
     
-    public convenience init(return: Any) {
-        try! self.init(ofType: .Return, port: 0xf) // try! is ok here because I
+    public init(return: Any) {
+        self.frameType = .Return
+        self.port = 0xf
+        self.payload = Data([])
     }
 
     public init(ofType frameType: FrameType = .DataFrame, port: UInt8 = 0, payload: Data = Data([])) throws {
