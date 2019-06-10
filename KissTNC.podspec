@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "KissTNC"
-  s.version      = "0.2.0"
+  s.version      = "0.3.0"
   s.summary      = "KissTNC is a framework for handling KISS frames from a TNC"
 
   # This description is used to generate tags and improve search results.
