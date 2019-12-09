@@ -7,13 +7,13 @@
 //
 import Foundation
 
-public class KissFrame {
+public struct KissFrame: Equatable {
     static let FEND: UInt8 = 0xC0
     static let FESC: UInt8 = 0xDB
     static let TFEND: UInt8 = 0xDC
     static let TFESC: UInt8 = 0xDD
     
-    public enum FrameType: UInt8 {
+    enum RawFrameType: UInt8 {
         case DataFrame = 0x00
         case TXDelay = 0x01
         case P = 0x02
@@ -24,19 +24,89 @@ public class KissFrame {
         case Return = 0x0F
     }
     
-    public enum Errors: Error {
-        case EmptyFrame
-        case InvalidFrameType(_ frameType: UInt8)
-        case InvalidPortNumber(_ portNumber: UInt8)
+    public enum FrameType: Equatable {
+        case DataFrame(Data)
+        case TXDelay(UInt8)
+        case P(UInt8)
+        case SlotTime(UInt8)
+        case TXTail(UInt8)
+        case FullDuplex(Bool)
+        case SetHardware(Data)
+        case Return
+        
+        init(_ type: UInt8, _ payload: Data) throws {
+            guard let frameType = RawFrameType(rawValue: type) else {
+                throw Error.InvalidFrameType(type)
+            }
+            
+            self.init(frameType, payload)
+        }
+
+        init(_ type: RawFrameType, _ payload: Data) {
+            switch type {
+            case .DataFrame:
+                self = .DataFrame(payload)
+            case .TXDelay:
+                self = .TXDelay(UInt8(payload[0]))
+            case .P:
+                self = .P(UInt8(payload[0]))
+            case .SlotTime:
+                self = .SlotTime(UInt8(payload[0]))
+            case .TXTail:
+                self = .TXTail(UInt8(payload[0]))
+            case .FullDuplex:
+                self = .FullDuplex(Bool(payload[0] == 0 ? false : true))
+            case .SetHardware:
+                self = .SetHardware(payload)
+            case .Return:
+                self = .Return
+            }
+        }
+        
+        var trueRawFrameType: RawFrameType {
+            switch self {
+            case .DataFrame:
+                return .DataFrame
+            case .TXDelay:
+                return .TXDelay
+            case .P:
+                return .P
+            case .SlotTime:
+                return .SlotTime
+            case .TXTail:
+                return .TXTail
+            case .FullDuplex:
+                return .FullDuplex
+            case .SetHardware:
+                return .SetHardware
+            case .Return:
+                return .Return
+            }
+        }
+            
+        public var rawFrameType: UInt8 {
+            return trueRawFrameType.rawValue
+        }
+        
     }
     
     public let port: UInt8
-    public let frameType: FrameType
+    public let type: FrameType
     
-    // payload contains unescaped data
-    public let payload: Data
+    public init(_ port: UInt8, _ type: FrameType) throws {
+        guard port <= 15 else {
+            throw Error.InvalidPortNumber(port)
+        }
+        self.port = port
+        self.type = type
+    }
     
-    public convenience init(fromData data: Data) throws {
+    public init(_ type: FrameType, _ port: UInt8 = 0x00) throws {
+        try self.init(port, type)
+    }
+    
+    // TODO: change this to use Codable and write a Coder
+    public init(fromData data: Data) throws {
         var frameData = data
         if frameData.first == KissFrame.FEND {
             frameData = frameData.suffix(from: frameData.startIndex + 1)
@@ -45,72 +115,41 @@ public class KissFrame {
         
         let decodedFrameData = KissFrame.decode(frameData)
         guard let portFrameTypeField = decodedFrameData.first else {
-            throw Errors.EmptyFrame
+            throw Error.EmptyFrame
         }
 
         let port = (portFrameTypeField & 0xf0) >> 4
         let frameTypeValue = portFrameTypeField & 0x0f
-
-        guard let frameType = FrameType(rawValue: frameTypeValue) else {
-            throw Errors.InvalidFrameType(frameTypeValue)
-        }
         
         let payload = decodedFrameData.suffix(from: decodedFrameData.startIndex + 1)
-        try self.init(ofType: frameType, port: port, payload: payload)
-    }
-
-    public convenience init(data: Data, port: UInt8 = 0) throws {
-        try self.init(ofType: .DataFrame, port: port, payload: data)
+        let type = try FrameType(frameTypeValue, payload)
+        
+        try self.init(port, type)
     }
     
-    public convenience init(txDelay: UInt8, port: UInt8 = 0) throws {
-        try self.init(ofType: .TXDelay, port: port, payload: Data([txDelay]))
-    }
-    
-    public convenience init(P: UInt8, port: UInt8 = 0) throws {
-        try self.init(ofType: .P, port: port, payload: Data([P]))
-    }
-    
-    public convenience init(slotTime: UInt8, port: UInt8 = 0) throws {
-        try self.init(ofType: .SlotTime, port: port, payload: Data([slotTime]))
-    }
-    
-    @available(*, deprecated, message: "obsolete according to spec, only here for compatibility")
-    public convenience init?(txTail: UInt8, port: UInt8 = 0) throws {
-        try self.init(ofType: .TXTail, port: port, payload: Data([txTail]))
-    }
-
-    public convenience init(fullDuplex: Bool, port: UInt8 = 0) throws {
-        try self.init(ofType: .FullDuplex, port: port, payload: Data([fullDuplex ? 1 : 0]))
-    }
-
-    public convenience init(setHardware: Data, port: UInt8 = 0) throws {
-        try self.init(ofType: .SetHardware, port: port, payload: setHardware)
-    }
-    
-    public init(return: Any) {
-        self.frameType = .Return
-        self.port = 0xf
-        self.payload = Data([])
-    }
-
-    public init(ofType frameType: FrameType = .DataFrame, port: UInt8 = 0, payload: Data = Data([])) throws {
-        guard port <= 15 else {
-            throw Errors.InvalidPortNumber(port)
+    public var payload: Data {
+        switch self.type {
+        case .DataFrame(let data), .SetHardware(let data):
+            return data
+        case .FullDuplex(let fullDuplex):
+            return fullDuplex ? Data([0x01]) : Data([0x00])
+        case let .P(num), let .SlotTime(num), let .TXTail(num), let .TXDelay(num):
+            return Data([num])
+        case .Return:
+            return Data([])
         }
-        self.frameType = frameType
-        self.port = port
-        self.payload = payload
     }
-
-    public func frame() -> Data {
+    
+    public var frame: Data {
         var outputFrame = Data([KissFrame.FEND])
-        outputFrame.append(KissFrame.encode(Data([port << 4 | frameType.rawValue])))
+        outputFrame.append(KissFrame.encode(Data([port << 4 | self.type.rawFrameType])))
         outputFrame.append(KissFrame.encode(payload))
         outputFrame.append(KissFrame.FEND)
         return outputFrame
     }
 
+
+    // TODO: change to Codable
     private static func decode(_ data: Data) -> Data {
         guard data.firstIndex(of: KissFrame.FESC) != nil else {
             return data
@@ -139,6 +178,7 @@ public class KissFrame {
         return newData
     }
 
+    // TODO: change to codable
     private static func encode(_ data: Data) -> Data {
         guard data.first(where: { $0 == KissFrame.FEND || $0 == KissFrame.FESC }) != nil else {
             return data
@@ -159,11 +199,9 @@ public class KissFrame {
     }
 }
 
-extension KissFrame: Equatable {
-    public static func == (lhs: KissFrame, rhs: KissFrame) -> Bool {
-        return
-            lhs.frameType == rhs.frameType &&
-            lhs.port == rhs.port &&
-            lhs.payload == rhs.payload
-    }
+
+public enum Error: Swift.Error {
+    case EmptyFrame
+    case InvalidFrameType(_ frameType: UInt8)
+    case InvalidPortNumber(_ portNumber: UInt8)
 }
